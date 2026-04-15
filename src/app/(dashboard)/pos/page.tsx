@@ -436,12 +436,10 @@ export default function POSPage() {
     try {
       const payload = {
         payment_method: checkoutMethod,
-        received_amount: Number(receivedAmount) || cartTotal,
+        received_amount: checkoutMethod === 'debt' && (!receivedAmount || Number(receivedAmount) === 0) ? 0 : (Number(receivedAmount) || finalTotal),
         shift: currentShift,
         debtor_id: checkoutMethod === 'debt' ? debtorId : null,
         customer_name: customerName.trim() || null,
-        received_amount: checkoutMethod === 'debt' && (!receivedAmount || Number(receivedAmount) === 0) ? 0 : (Number(receivedAmount) || finalTotal),
-        payment_method: checkoutMethod,
         discount: (cartTotal * (Number(discountPercentage) || 0)) / 100,
         items: cart.map((item) => ({
           product_id: item.id,
