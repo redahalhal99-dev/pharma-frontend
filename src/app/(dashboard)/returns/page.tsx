@@ -28,10 +28,16 @@ export default function ReturnsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const currentDate = new Date();
+  const [selectedMonth, setSelectedMonth] = useState(currentDate.getMonth() + 1);
+  const [selectedYear, setSelectedYear] = useState(currentDate.getFullYear());
+
   const fetchReturns = async () => {
     setIsLoading(true);
     try {
-      const response = await axiosInstance.get('/returns');
+      const response = await axiosInstance.get('/returns', {
+        params: { month: selectedMonth, year: selectedYear }
+      });
       setReturns(response.data.data || response.data);
     } catch (error) {
       toast.error('Failed to load returns');
@@ -42,7 +48,7 @@ export default function ReturnsPage() {
 
   useEffect(() => {
     fetchReturns();
-  }, []);
+  }, [selectedMonth, selectedYear]);
 
   const totalReturns = returns.length;
   const totalRefunded = returns.reduce((sum, r) => sum + Number(r.amount_refunded), 0);
@@ -82,6 +88,30 @@ export default function ReturnsPage() {
             </CardContent>
           </Card>
         ))}
+      </div>
+
+      <div className="flex flex-wrap gap-3">
+        <select
+          value={selectedMonth}
+          onChange={(e) => setSelectedMonth(Number(e.target.value))}
+          className="h-10 rounded-xl border border-border bg-white dark:bg-slate-900 px-3 text-sm font-bold text-textMain outline-none focus:ring-2 focus:ring-primary-500"
+        >
+          {Array.from({ length: 12 }).map((_, i) => (
+            <option key={i + 1} value={i + 1}>
+              {new Date(0, i).toLocaleString(language === 'ar' ? 'ar-EG' : 'en-US', { month: 'long' })}
+            </option>
+          ))}
+        </select>
+        <select
+          value={selectedYear}
+          onChange={(e) => setSelectedYear(Number(e.target.value))}
+          className="h-10 rounded-xl border border-border bg-white dark:bg-slate-900 px-3 text-sm font-bold text-textMain outline-none focus:ring-2 focus:ring-primary-500"
+        >
+          {Array.from({ length: 5 }).map((_, i) => {
+            const year = currentDate.getFullYear() - i;
+            return <option key={year} value={year}>{year}</option>;
+          })}
+        </select>
       </div>
 
       <Card>

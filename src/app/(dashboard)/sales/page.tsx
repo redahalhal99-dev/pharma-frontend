@@ -25,14 +25,21 @@ export default function SalesHistoryPage() {
   const t = translations[language];
   const isAr = language === 'ar';
 
+  const currentDate = new Date();
+  const [selectedMonth, setSelectedMonth] = useState(currentDate.getMonth() + 1);
+  const [selectedYear, setSelectedYear] = useState(currentDate.getFullYear());
+
   const [sales, setSales] = useState<Sale[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
 
   useEffect(() => {
     const fetchSales = async () => {
+      setLoading(true);
       try {
-        const res = await axiosInstance.get('/sales');
+        const res = await axiosInstance.get('/sales', {
+          params: { month: selectedMonth, year: selectedYear }
+        });
         setSales(res.data);
       } catch {
         toast.error(isAr ? 'فشل تحميل المبيعات' : 'Failed to load sales');
@@ -41,7 +48,7 @@ export default function SalesHistoryPage() {
       }
     };
     fetchSales();
-  }, [isAr]);
+  }, [isAr, selectedMonth, selectedYear]);
 
   const filtered = sales.filter(s => {
     const term = search.toLowerCase();
@@ -82,6 +89,30 @@ export default function SalesHistoryPage() {
           value={search}
           onChange={e => setSearch(e.target.value)}
         />
+      </div>
+
+      <div className="flex flex-wrap gap-3">
+        <select
+          value={selectedMonth}
+          onChange={(e) => setSelectedMonth(Number(e.target.value))}
+          className="h-10 rounded-xl border border-border bg-white dark:bg-slate-900 px-3 text-sm font-bold text-textMain outline-none focus:ring-2 focus:ring-primary-500"
+        >
+          {Array.from({ length: 12 }).map((_, i) => (
+            <option key={i + 1} value={i + 1}>
+              {new Date(0, i).toLocaleString(isAr ? 'ar-EG' : 'en-US', { month: 'long' })}
+            </option>
+          ))}
+        </select>
+        <select
+          value={selectedYear}
+          onChange={(e) => setSelectedYear(Number(e.target.value))}
+          className="h-10 rounded-xl border border-border bg-white dark:bg-slate-900 px-3 text-sm font-bold text-textMain outline-none focus:ring-2 focus:ring-primary-500"
+        >
+          {Array.from({ length: 5 }).map((_, i) => {
+            const year = currentDate.getFullYear() - i;
+            return <option key={year} value={year}>{year}</option>;
+          })}
+        </select>
       </div>
 
       {loading ? (

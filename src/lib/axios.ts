@@ -48,6 +48,8 @@ axiosInstance.interceptors.response.use(
         localStorage.removeItem('token');
         sessionStorage.removeItem('token');
         localStorage.removeItem('user');
+        localStorage.removeItem('auth-storage');
+        sessionStorage.removeItem('auth-storage');
         window.location.href = '/login';
       }
     }

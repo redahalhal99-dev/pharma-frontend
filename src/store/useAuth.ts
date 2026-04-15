@@ -47,7 +47,8 @@ export const useAuthStore = create<AuthState>()(
         set({ user: null, token: null });
         localStorage.removeItem('token');
         sessionStorage.removeItem('token');
-        localStorage.removeItem('auth-storage'); // Clear persisted state
+        localStorage.removeItem('auth-storage');
+        sessionStorage.removeItem('auth-storage');
       },
       setSubscriptionStatus: (expired) => set({ isSubscriptionExpired: expired }),
     }),

@@ -213,6 +213,7 @@ export default function POSPage() {
   const [debtorId, setDebtorId] = useState<string>('');
   const [debtors, setDebtors] = useState<any[]>([]);
   const [receivedAmount, setReceivedAmount] = useState<string>('');
+  const [discountAmount, setDiscountAmount] = useState<string>('');
   const [isCheckoutLoading, setIsCheckoutLoading] = useState(false);
   const [showCamera, setShowCamera] = useState(false);
   const [showShortcutsModal, setShowShortcutsModal] = useState(false);
@@ -439,6 +440,7 @@ export default function POSPage() {
         shift: currentShift,
         debtor_id: checkoutMethod === 'debt' ? debtorId : null,
         customer_name: customerName.trim() || null,
+        discount: Number(discountAmount) || 0,
         items: cart.map((item) => ({
           product_id: item.id,
           quantity: item.cartQuantity,
@@ -488,6 +490,7 @@ export default function POSPage() {
     setActiveProductIndex(-1);
     setIsCheckoutLoading(false);
     setCustomerName('');
+    setDiscountAmount('');
     setTimeout(() => searchInputRef.current?.focus(), 150);
   };
 
@@ -630,7 +633,8 @@ export default function POSPage() {
     }
   };
 
-  const changeDue = Math.max(0, (Number(receivedAmount) || 0) - cartTotal);
+  const finalTotal = Math.max(0, cartTotal - (Number(discountAmount) || 0));
+  const changeDue = Math.max(0, (Number(receivedAmount) || 0) - finalTotal);
 
   return (
     <div className="flex flex-col gap-3 h-[calc(100vh-4.5rem)] lg:h-[calc(100vh-6.5rem)] overflow-hidden">
@@ -873,8 +877,32 @@ export default function POSPage() {
                   {isAr ? 'المطلوب سداده' : 'Total Due'}
                 </p>
                 <p className="text-5xl font-black text-primary-600 font-mono tracking-tighter">
-                  {cartTotal.toFixed(2)}
+                  {finalTotal.toFixed(2)}
                 </p>
+                {Number(discountAmount) > 0 && (
+                  <p className="text-sm font-bold text-emerald-600 mt-2">
+                    {isAr ? 'خصم:' : 'Discount:'} {Number(discountAmount).toFixed(2)}
+                  </p>
+                )}
+              </div>
+
+              {/* Discount Input */}
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 font-bold text-textMain text-sm">
+                  <DashLg className="h-4 w-4 text-emerald-500" />
+                  {isAr ? 'قيمة الخصم (اختياري)' : 'Discount (optional)'}
+                </label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    placeholder="0.00"
+                    value={discountAmount}
+                    onChange={(e) => setDiscountAmount(e.target.value)}
+                    className="w-full h-11 rounded-xl border border-border bg-white dark:bg-slate-900 px-4 text-sm font-medium text-textMain placeholder:text-textMuted focus:outline-none focus:ring-2 focus:ring-emerald-400 dark:focus:ring-emerald-600 transition-shadow"
+                    min="0"
+                    max={cartTotal}
+                  />
+                </div>
               </div>
 
               {/* Customer Name — for ALL payment methods */}
@@ -983,13 +1011,13 @@ export default function POSPage() {
                     <div className="relative">
                       <span
                         className="absolute ltr:left-3 rtl:right-3 top-1/2 -translate-y-1/2 text-textMuted cursor-pointer hover:text-primary-600 text-base"
-                        onClick={() => setReceivedAmount(checkoutMethod === 'debt' ? '0' : cartTotal.toFixed(2))}
+                        onClick={() => setReceivedAmount(checkoutMethod === 'debt' ? '0' : finalTotal.toFixed(2))}
                       >💵</span>
                       <input
                         ref={receivedInputRef}
                         type="number"
                         className="w-full text-2xl font-black font-mono ltr:pl-9 rtl:pr-9 pr-3 py-3 rounded-2xl bg-white dark:bg-slate-900 border-2 border-border focus:border-primary-500 focus:ring-4 focus:ring-primary-500/20 transition-all text-textMain outline-none"
-                        placeholder={checkoutMethod === 'debt' ? '0.00' : cartTotal.toFixed(2)}
+                        placeholder={checkoutMethod === 'debt' ? '0.00' : finalTotal.toFixed(2)}
                         value={receivedAmount}
                         onChange={(e) => setReceivedAmount(e.target.value)}
                         onKeyDown={(e) => { if (e.key === 'Enter') handleCheckoutConfirm(); }}
@@ -1007,8 +1035,8 @@ export default function POSPage() {
                           ? 'bg-green-50 border-green-200 text-green-600 dark:bg-green-900/20 dark:border-green-800'
                           : 'bg-slate-50 border-transparent text-textMuted dark:bg-slate-800'
                     }`}>
-                      {checkoutMethod === 'debt' 
-                         ? Math.max(0, cartTotal - (Number(receivedAmount) || 0)).toFixed(2)
+                       {checkoutMethod === 'debt' 
+                         ? Math.max(0, finalTotal - (Number(receivedAmount) || 0)).toFixed(2)
                          : changeDue.toFixed(2)
                       }
                     </div>
