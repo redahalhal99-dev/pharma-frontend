@@ -42,17 +42,7 @@ axiosInstance.interceptors.request.use(
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      // Clear token and redirect to login if unauthorized
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('token');
-        sessionStorage.removeItem('token');
-        localStorage.removeItem('user');
-        localStorage.removeItem('auth-storage');
-        sessionStorage.removeItem('auth-storage');
-        window.location.href = '/login';
-      }
-    }
+    // Only the explicit logout button will log the user out now.
     return Promise.reject(error);
   }
 );

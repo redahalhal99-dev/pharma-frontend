@@ -199,24 +199,24 @@ export default function DashboardPage() {
     },
   ] : [
     {
-      title: isAr ? 'إيرادات اليوم' : 'Today Revenue',
-      value: `${(stats.today_sales || 0)} ${isAr ? 'عنصر' : 'Items'}`,
-      icon: GraphUpArrow, accent: 'emerald' as const, trend: 'up' as const,
+      title: isAr ? 'أرباح شيفت الصباح' : 'Morning Profit',
+      value: `${(stats.daily_profit_morning || 0).toFixed(2)}`,
+      icon: Activity, accent: 'amber' as const,
     },
     {
-      title: isAr ? 'أرباح اليوم' : 'Today Profit',
-      value: `${(stats.daily_profit || 0).toFixed(2)}`,
+      title: isAr ? 'أرباح شيفت المساء' : 'Evening Profit',
+      value: `${(stats.daily_profit_evening || 0).toFixed(2)}`,
       icon: Activity, accent: 'sky' as const,
+    },
+    {
+      title: isAr ? 'إجمالي أرباح اليوم' : 'Total Profit Today',
+      value: `${(stats.daily_profit || 0).toFixed(2)}`,
+      icon: GraphUpArrow, accent: 'emerald' as const, trend: 'up' as const,
     },
     {
       title: t.monthlyProfit,
       value: `${(stats.monthly_profit || 0).toFixed(2)}`,
       icon: CashStack, accent: 'violet' as const,
-    },
-    {
-      title: t.monthlyIncome,
-      value: `${(stats.monthly_revenue || 0).toFixed(2)}`,
-      icon: BoxSeam, accent: 'orange' as const,
     },
   ];
 

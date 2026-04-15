@@ -5,7 +5,7 @@ import axiosInstance from '@/lib/axios';
 import { useAppStore } from '@/store/useAppStore';
 import { translations } from '@/locales/translations';
 import { Input } from '@/components/ui/Input';
-import { FileEarmarkText, Search, BoxSeam, Person, Calendar } from 'react-bootstrap-icons';
+import { FileEarmarkText, Search, BoxSeam, Person, Calendar, X } from 'react-bootstrap-icons';
 import toast from 'react-hot-toast';
 
 type Sale = {
@@ -16,7 +16,11 @@ type Sale = {
   quantity_type: 'box' | 'strip';
   date: string;
   profit: number;
-  product: { id: number; name: string; price: number; barcode: string; strip_price?: number };
+  received_amount?: string | number | null;
+  payment_method?: string | null;
+  global_discount?: string | number | null;
+  shift?: string;
+  product: { id: number; name: string; price: number; barcode: string; strip_price?: number; cost_price: number };
   user: { id: number; name: string };
 };
 
@@ -32,6 +36,7 @@ export default function SalesHistoryPage() {
   const [sales, setSales] = useState<Sale[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [selectedSale, setSelectedSale] = useState<Sale | null>(null);
 
   useEffect(() => {
     const fetchSales = async () => {
@@ -141,7 +146,11 @@ export default function SalesHistoryPage() {
               </thead>
               <tbody className="divide-y divide-border">
                 {filtered.map((sale, i) => (
-                  <tr key={sale.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
+                  <tr 
+                    key={sale.id} 
+                    className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors cursor-pointer"
+                    onClick={() => setSelectedSale(sale)}
+                  >
                     <td className="px-4 py-3 text-textMuted">{i + 1}</td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
@@ -185,6 +194,51 @@ export default function SalesHistoryPage() {
                 ))}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+
+      {selectedSale && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-surface rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden border border-border sm:scale-in-center">
+            <div className="flex justify-between items-center p-4 border-b border-border bg-primary-50 dark:bg-primary-900/20">
+              <h3 className="font-bold text-primary-700 dark:text-primary-300">
+                {isAr ? 'تفاصيل المبيعة / الفاتورة' : 'Sale Receipt'}
+              </h3>
+              <button onClick={() => setSelectedSale(null)} className="text-primary-500 hover:bg-primary-100 hover:text-red-500 p-1.5 rounded-lg transition-colors">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-5 space-y-3">
+              <div className="flex justify-between text-sm py-1 border-b border-border/50">
+                <span className="text-textMuted">{isAr ? 'المنتج' : 'Product'}</span>
+                <span className="font-bold">{selectedSale.product?.name}</span>
+              </div>
+              <div className="flex justify-between text-sm py-1 border-b border-border/50">
+                <span className="text-textMuted">{isAr ? 'الكمية' : 'Quantity'}</span>
+                <span className="font-bold">{selectedSale.quantity} {selectedSale.quantity_type === 'strip' ? t.unitStrip : t.unitBox}</span>
+              </div>
+              <div className="flex justify-between text-sm py-1 border-b border-border/50">
+                <span className="text-textMuted">{isAr ? 'الإجمالي (الفاتورة)' : 'Total Cost'}</span>
+                <span className="font-bold text-primary-600 font-mono">{(selectedSale.quantity * getPrice(selectedSale)).toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between text-sm py-1 border-b border-border/50">
+                <span className="text-textMuted">{isAr ? 'المُحصل / المستلم' : 'Received Amount'}</span>
+                <span className="font-bold font-mono">{selectedSale.received_amount != null ? Number(selectedSale.received_amount).toFixed(2) : '—'}</span>
+              </div>
+              <div className="flex justify-between text-sm py-1 border-b border-border/50">
+                <span className="text-textMuted">{isAr ? 'الخصم المطبق' : 'Global Discount'}</span>
+                <span className="font-bold text-emerald-500 font-mono">{selectedSale.global_discount != null ? Number(selectedSale.global_discount).toFixed(2) : '0.00'}</span>
+              </div>
+              <div className="flex justify-between text-sm py-1 border-b border-border/50">
+                <span className="text-textMuted">{isAr ? 'طريقة الدفع' : 'Payment Method'}</span>
+                <span className="font-bold capitalize">{selectedSale.payment_method || 'Cash'}</span>
+              </div>
+              <div className="flex justify-between text-sm py-1">
+                <span className="text-textMuted">{isAr ? 'الوردية' : 'Shift'}</span>
+                <span className="font-bold">{selectedSale.shift === 'evening' ? (isAr ? 'مسائي' : 'Evening') : (isAr ? 'صباحي' : 'Morning')}</span>
+              </div>
+            </div>
           </div>
         </div>
       )}

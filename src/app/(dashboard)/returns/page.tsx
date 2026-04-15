@@ -46,6 +46,18 @@ export default function ReturnsPage() {
     }
   };
 
+  const handleDelete = async (id: number) => {
+    if (confirm(language === 'ar' ? 'هل أنت متأكد من حذف هذا المرتجع؟ سيتم إنقاص المخزون مرة ثانية.' : 'Delete this return? Stock will be reduced back.')) {
+      try {
+        await axiosInstance.delete(`/returns/${id}`);
+        toast.success(language === 'ar' ? 'تم حذف المرتجع بنجاح' : 'Return deleted successfully');
+        fetchReturns();
+      } catch {
+        toast.error('Failed to delete return');
+      }
+    }
+  };
+
   useEffect(() => {
     fetchReturns();
   }, [selectedMonth, selectedYear]);
@@ -133,6 +145,7 @@ export default function ReturnsPage() {
                     <th className="px-4 py-3">Reason</th>
                     <th className="px-4 py-3">Date</th>
                     <th className="px-4 py-3">Processed By</th>
+                    <th className="px-4 py-3">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -150,11 +163,23 @@ export default function ReturnsPage() {
                         {new Date(ret.created_at).toLocaleString()}
                       </td>
                       <td className="px-4 py-3 text-xs">{ret.user?.name}</td>
+                      <td className="px-4 py-3">
+                        <button 
+                          onClick={() => handleDelete(ret.id)}
+                          className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                          title="Delete Return"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-trash" viewBox="0 0 16 16">
+                            <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
+                            <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
+                          </svg>
+                        </button>
+                      </td>
                     </tr>
                   ))}
                   {returns.length === 0 && (
                     <tr>
-                      <td colSpan={8} className="text-center py-8 text-textMuted">
+                      <td colSpan={9} className="text-center py-8 text-textMuted">
                         No returns found.
                       </td>
                     </tr>

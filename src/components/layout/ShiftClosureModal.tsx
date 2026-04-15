@@ -54,7 +54,7 @@ export function ShiftClosureModal({ isOpen, onClose }: { isOpen: boolean; onClos
     try {
       await axiosInstance.post('/reports/close-shift', {
         password,
-        shift: currentShift,
+        shift: currentShift || 'morning',
         date: summary?.date || new Date().toISOString().split('T')[0],
       });
 
@@ -75,7 +75,7 @@ export function ShiftClosureModal({ isOpen, onClose }: { isOpen: boolean; onClos
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[100] flex items-start pt-20 justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="bg-surface dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden border border-border">
         <div className="flex justify-between items-center p-5 border-b border-border bg-slate-50 dark:bg-slate-900/50">
           <h3 className="text-xl font-bold text-textMain flex items-center gap-2">

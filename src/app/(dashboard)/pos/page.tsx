@@ -213,7 +213,7 @@ export default function POSPage() {
   const [debtorId, setDebtorId] = useState<string>('');
   const [debtors, setDebtors] = useState<any[]>([]);
   const [receivedAmount, setReceivedAmount] = useState<string>('');
-  const [discountAmount, setDiscountAmount] = useState<string>('');
+  const [discountPercentage, setDiscountPercentage] = useState<string>('');
   const [isCheckoutLoading, setIsCheckoutLoading] = useState(false);
   const [showCamera, setShowCamera] = useState(false);
   const [showShortcutsModal, setShowShortcutsModal] = useState(false);
@@ -440,7 +440,9 @@ export default function POSPage() {
         shift: currentShift,
         debtor_id: checkoutMethod === 'debt' ? debtorId : null,
         customer_name: customerName.trim() || null,
-        discount: Number(discountAmount) || 0,
+        received_amount: checkoutMethod === 'debt' && (!receivedAmount || Number(receivedAmount) === 0) ? 0 : (Number(receivedAmount) || finalTotal),
+        payment_method: checkoutMethod,
+        discount: (cartTotal * (Number(discountPercentage) || 0)) / 100,
         items: cart.map((item) => ({
           product_id: item.id,
           quantity: item.cartQuantity,
@@ -490,7 +492,7 @@ export default function POSPage() {
     setActiveProductIndex(-1);
     setIsCheckoutLoading(false);
     setCustomerName('');
-    setDiscountAmount('');
+    setDiscountPercentage('');
     setTimeout(() => searchInputRef.current?.focus(), 150);
   };
 
@@ -633,7 +635,8 @@ export default function POSPage() {
     }
   };
 
-  const finalTotal = Math.max(0, cartTotal - (Number(discountAmount) || 0));
+  const calculatedDiscount = (cartTotal * (Number(discountPercentage) || 0)) / 100;
+  const finalTotal = Math.max(0, cartTotal - calculatedDiscount);
   const changeDue = Math.max(0, (Number(receivedAmount) || 0) - finalTotal);
 
   return (
@@ -879,9 +882,9 @@ export default function POSPage() {
                 <p className="text-5xl font-black text-primary-600 font-mono tracking-tighter">
                   {finalTotal.toFixed(2)}
                 </p>
-                {Number(discountAmount) > 0 && (
+                {Number(discountPercentage) > 0 && (
                   <p className="text-sm font-bold text-emerald-600 mt-2">
-                    {isAr ? 'خصم:' : 'Discount:'} {Number(discountAmount).toFixed(2)}
+                    {isAr ? 'خصم:' : 'Discount:'} {calculatedDiscount.toFixed(2)} ({discountPercentage}%)
                   </p>
                 )}
               </div>
@@ -890,18 +893,19 @@ export default function POSPage() {
               <div className="space-y-2">
                 <label className="flex items-center gap-2 font-bold text-textMain text-sm">
                   <DashLg className="h-4 w-4 text-emerald-500" />
-                  {isAr ? 'قيمة الخصم (اختياري)' : 'Discount (optional)'}
+                  {isAr ? 'نسبة الخصم المئوية % (اختياري)' : 'Discount % (optional)'}
                 </label>
                 <div className="relative">
                   <input
                     type="number"
-                    placeholder="0.00"
-                    value={discountAmount}
-                    onChange={(e) => setDiscountAmount(e.target.value)}
+                    placeholder="0"
+                    value={discountPercentage}
+                    onChange={(e) => setDiscountPercentage(e.target.value)}
                     className="w-full h-11 rounded-xl border border-border bg-white dark:bg-slate-900 px-4 text-sm font-medium text-textMain placeholder:text-textMuted focus:outline-none focus:ring-2 focus:ring-emerald-400 dark:focus:ring-emerald-600 transition-shadow"
                     min="0"
-                    max={cartTotal}
+                    max="100"
                   />
+                  <span className="absolute ltr:right-4 rtl:left-4 top-1/2 -translate-y-1/2 text-textMuted font-bold">%</span>
                 </div>
               </div>
 
