@@ -208,7 +208,7 @@ export default function DashboardPage() {
     );
   }
 
-  const isAdmin = user?.role === 'admin';
+  const isAdmin = user?.role?.toLowerCase() === 'admin' || user?.id === 1;
 
   // ── Stat cards data ──
   const statCards = isAdmin ? [
@@ -283,20 +283,13 @@ export default function DashboardPage() {
         )}
       </div>
 
-      {/* ── Stat Cards ── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-        {statCards.map((card, idx) => (
-          <StatCard key={idx} {...card} />
-        ))}
-      </div>
-
       {/* ── Admin: System Tools ── */}
       {isAdmin && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
           <button
             disabled={isProcessing}
             onClick={handleBackup}
-            className="group flex items-center justify-between p-6 rounded-3xl bg-surface dark:bg-slate-900 border border-border shadow-premium shadow-premium-hover transition-all duration-300 ltr:text-left rtl:text-right disabled:opacity-50"
+            className="group flex items-center justify-between p-6 rounded-3xl bg-surface dark:bg-slate-900 border-2 border-primary-500/20 shadow-premium shadow-premium-hover transition-all duration-300 ltr:text-left rtl:text-right disabled:opacity-50"
           >
             <div className="flex items-center gap-4">
               <div className="flex h-14 w-14 items-center justify-center rounded-2xl grad-rose text-white shadow-lg shadow-black/10 transition-transform group-hover:scale-110">
@@ -304,10 +297,10 @@ export default function DashboardPage() {
               </div>
               <div>
                 <span className="block text-sm font-black text-textMain">
-                  {isAr ? 'النسخ الاحتياطي' : 'Database Backup'}
+                  {isAr ? 'النسخ الاحتياطي للداتا' : 'Full Database Backup'}
                 </span>
                 <span className="block text-[10px] font-bold text-textMuted mt-0.5 uppercase tracking-wider">
-                  {isAr ? 'تحميل وحفظ نسخة' : 'Download & Store SQL'}
+                  {isAr ? 'تحميل وحفظ نسخة SQL' : 'Download & Store SQL'}
                 </span>
               </div>
             </div>
@@ -317,7 +310,7 @@ export default function DashboardPage() {
           <button
             disabled={isProcessing}
             onClick={handleSyncDrugs}
-            className="group flex items-center justify-between p-6 rounded-3xl bg-surface dark:bg-slate-900 border border-border shadow-premium shadow-premium-hover transition-all duration-300 ltr:text-left rtl:text-right disabled:opacity-50"
+            className="group flex items-center justify-between p-6 rounded-3xl bg-surface dark:bg-slate-900 border-2 border-primary-500/20 shadow-premium shadow-premium-hover transition-all duration-300 ltr:text-left rtl:text-right disabled:opacity-50"
           >
             <div className="flex items-center gap-4">
               <div className="flex h-14 w-14 items-center justify-center rounded-2xl grad-violet text-white shadow-lg shadow-black/10 transition-transform group-hover:scale-110">
@@ -325,10 +318,10 @@ export default function DashboardPage() {
               </div>
               <div>
                 <span className="block text-sm font-black text-textMain">
-                  {isAr ? 'مزامنة الأدوية' : 'Sync Drug Catalog'}
+                  {isAr ? 'مزامنة الأدوية (26 ألف صنف)' : 'Sync Global Drug Catalog'}
                 </span>
                 <span className="block text-[10px] font-bold text-textMuted mt-0.5 uppercase tracking-wider">
-                  {isAr ? 'تحديث 26,201 صنف' : 'Update 26,201 records'}
+                  {isAr ? 'تحديث جميع الصيدليات' : 'Update All Pharmacies'}
                 </span>
               </div>
             </div>
@@ -336,6 +329,13 @@ export default function DashboardPage() {
           </button>
         </div>
       )}
+
+      {/* ── Stat Cards ── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+        {statCards.map((card, idx) => (
+          <StatCard key={idx} {...card} />
+        ))}
+      </div>
 
       {/* ── Quick Actions Section ── */}
       {!isAdmin && (
