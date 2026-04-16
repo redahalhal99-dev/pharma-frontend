@@ -42,7 +42,22 @@ axiosInstance.interceptors.request.use(
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Only the explicit logout button will log the user out now.
+    if (error.response?.status === 401 && typeof window !== 'undefined') {
+      // Don't redirect if already on login page or if this is the login request itself
+      const isLoginPage = window.location.pathname.includes('/login');
+      const isLoginRequest = error.config?.url?.includes('/login');
+      
+      if (!isLoginPage && !isLoginRequest) {
+        // Clear all stale auth data
+        localStorage.removeItem('token');
+        localStorage.removeItem('auth-storage');
+        sessionStorage.removeItem('token');
+        sessionStorage.removeItem('auth-storage');
+        
+        // Redirect to login
+        window.location.href = '/login';
+      }
+    }
     return Promise.reject(error);
   }
 );
