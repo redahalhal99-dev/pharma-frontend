@@ -8,7 +8,7 @@ import { translations } from '@/locales/translations';
 import {
   CashStack, BoxSeam, GraphUpArrow, ArrowRepeat, ExclamationTriangleFill,
   Clock, Robot, Send, Shop, PeopleFill, ArrowUpRight, ArrowDownRight,
-  Activity, ShieldExclamation, CheckCircle, Stars, Cart4
+  Activity, ShieldExclamation, CheckCircle, Stars, Cart4, Database, CloudDownload
 } from 'react-bootstrap-icons';
 import toast from 'react-hot-toast';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
@@ -134,6 +134,41 @@ export default function DashboardPage() {
   const [expiredProducts, setExpiredProducts] = useState<any[]>([]);
   const [pharmacies, setPharmacies] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const handleBackup = async () => {
+    try {
+      setIsProcessing(true);
+      const response = await axiosInstance.get('/admin/system/backup', {
+        responseType: 'blob'
+      });
+      
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `backup_${new Date().toISOString().split('T')[0]}.sql`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      toast.success(isAr ? 'بدأ تحميل النسخة الاحتياطية' : 'Backup download started');
+    } catch (error) {
+      toast.error(isAr ? 'فشل إنشاء النسخة الاحتياطية' : 'Backup failed');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleSyncDrugs = async () => {
+    try {
+      setIsProcessing(true);
+      const res = await axiosInstance.post('/admin/system/sync-drugs');
+      toast.success(res.data.message || (isAr ? 'تمت المزامنة بنجاح' : 'Sync successful'));
+    } catch (error) {
+      toast.error(isAr ? 'فشلت المزامنة' : 'Sync failed');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
 
   useEffect(() => {
     const fetchAll = async () => {
@@ -254,6 +289,53 @@ export default function DashboardPage() {
           <StatCard key={idx} {...card} />
         ))}
       </div>
+
+      {/* ── Admin: System Tools ── */}
+      {isAdmin && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+          <button
+            disabled={isProcessing}
+            onClick={handleBackup}
+            className="group flex items-center justify-between p-6 rounded-3xl bg-surface dark:bg-slate-900 border border-border shadow-premium shadow-premium-hover transition-all duration-300 ltr:text-left rtl:text-right disabled:opacity-50"
+          >
+            <div className="flex items-center gap-4">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl grad-rose text-white shadow-lg shadow-black/10 transition-transform group-hover:scale-110">
+                <CloudDownload className="h-7 w-7" />
+              </div>
+              <div>
+                <span className="block text-sm font-black text-textMain">
+                  {isAr ? 'النسخ الاحتياطي' : 'Database Backup'}
+                </span>
+                <span className="block text-[10px] font-bold text-textMuted mt-0.5 uppercase tracking-wider">
+                  {isAr ? 'تحميل وحفظ نسخة' : 'Download & Store SQL'}
+                </span>
+              </div>
+            </div>
+            {isProcessing && <ArrowRepeat className="h-5 w-5 animate-spin text-textMuted" />}
+          </button>
+
+          <button
+            disabled={isProcessing}
+            onClick={handleSyncDrugs}
+            className="group flex items-center justify-between p-6 rounded-3xl bg-surface dark:bg-slate-900 border border-border shadow-premium shadow-premium-hover transition-all duration-300 ltr:text-left rtl:text-right disabled:opacity-50"
+          >
+            <div className="flex items-center gap-4">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl grad-violet text-white shadow-lg shadow-black/10 transition-transform group-hover:scale-110">
+                <Database className="h-7 w-7" />
+              </div>
+              <div>
+                <span className="block text-sm font-black text-textMain">
+                  {isAr ? 'مزامنة الأدوية' : 'Sync Drug Catalog'}
+                </span>
+                <span className="block text-[10px] font-bold text-textMuted mt-0.5 uppercase tracking-wider">
+                  {isAr ? 'تحديث 26,201 صنف' : 'Update 26,201 records'}
+                </span>
+              </div>
+            </div>
+            {isProcessing && <ArrowRepeat className="h-5 w-5 animate-spin text-textMuted" />}
+          </button>
+        </div>
+      )}
 
       {/* ── Quick Actions Section ── */}
       {!isAdmin && (
