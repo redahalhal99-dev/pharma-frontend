@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/Card';
 import { useAppStore } from '@/store/useAppStore';
 import { useAuthStore } from '@/store/useAuth';
 import { translations } from '@/locales/translations';
-import { PlusLg, PencilSquare, Trash, ArrowRepeat, Snow, PlayFill, ExclamationTriangle, Robot } from 'react-bootstrap-icons';
+import { PlusLg, PencilSquare, Trash, ArrowRepeat, Snow, PlayFill, ExclamationTriangle, Robot, X } from 'react-bootstrap-icons';
 import toast from 'react-hot-toast';
 import { PharmacyModal } from './components/PharmacyModal';
 
