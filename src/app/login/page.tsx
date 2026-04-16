@@ -26,7 +26,7 @@ type Plan = {
 
 export default function LoginPage() {
   const router = useRouter();
-  const { setAuth } = useAuthStore();
+  const { token, setAuth } = useAuthStore();
 
   const [showLoginForm, setShowLoginForm] = useState(false);
   const [email, setEmail] = useState('');
@@ -40,6 +40,12 @@ export default function LoginPage() {
   useEffect(() => {
     axiosInstance.get('/plans').then(res => setPlans(res.data)).catch(() => {});
   }, []);
+
+  useEffect(() => {
+    if (token) {
+      router.push('/');
+    }
+  }, [token, router]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -229,7 +235,7 @@ export default function LoginPage() {
                   {language === 'ar' ? 'البريد الإلكتروني' : 'Email'}
                 </label>
                 <input
-                  type="email" required value={email} onChange={e => setEmail(e.target.value)}
+                  type="email" id="email" name="email" autoComplete="email" required value={email} onChange={e => setEmail(e.target.value)}
                   placeholder="you@example.com"
                   className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 />
@@ -239,7 +245,7 @@ export default function LoginPage() {
                   {language === 'ar' ? 'كلمة المرور' : 'Password'}
                 </label>
                 <input
-                  type="password" required value={password} onChange={e => setPassword(e.target.value)}
+                  type="password" id="password" name="password" autoComplete="current-password" required value={password} onChange={e => setPassword(e.target.value)}
                   placeholder="••••••••"
                   className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 />
