@@ -43,7 +43,10 @@ export default function PharmaciesPage() {
   const [pharmacies, setPharmacies] = useState<Pharmacy[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isBroadcastOpen, setIsBroadcastOpen] = useState(false);
   const [editingPharmacy, setEditingPharmacy] = useState<any>(null);
+  const [broadcastData, setBroadcastData] = useState({ title: '', body: '' });
+  const [isSending, setIsSending] = useState(false);
 
   const fetchPharmacies = async () => {
     setIsLoading(true);
@@ -90,14 +93,38 @@ export default function PharmaciesPage() {
     }
   };
 
+  const handleBroadcast = async () => {
+    if (!broadcastData.title || !broadcastData.body) {
+      toast.error(language === 'ar' ? 'برجاء ملء جميع الحقول' : 'Please fill all fields');
+      return;
+    }
+    setIsSending(true);
+    try {
+      await axiosInstance.post('/notifications/broadcast', broadcastData);
+      toast.success(language === 'ar' ? '✅ تم إرسال التنبيه للجميع' : '✅ Broadcast sent');
+      setIsBroadcastOpen(false);
+      setBroadcastData({ title: '', body: '' });
+    } catch {
+      toast.error('Failed to send broadcast');
+    } finally {
+      setIsSending(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-wrap justify-between items-center gap-4">
         <h1 className="text-2xl font-bold text-textMain">{t.pharmacies}</h1>
-        <Button onClick={() => { setEditingPharmacy(null); setIsModalOpen(true); }}>
-          <PlusLg className="h-4 w-4 mr-2 rtl:ml-2 rtl:mr-0" />
-          {t.add}
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" className="border-primary-500 text-primary-600" onClick={() => setIsBroadcastOpen(true)}>
+            <PlayFill className="h-4 w-4 mr-2 rtl:ml-2 rtl:mr-0 rotate-180" />
+            {language === 'ar' ? 'إرسال تنبيه للجميع' : 'Broadcast Message'}
+          </Button>
+          <Button onClick={() => { setEditingPharmacy(null); setIsModalOpen(true); }}>
+            <PlusLg className="h-4 w-4 mr-2 rtl:ml-2 rtl:mr-0" />
+            {t.add}
+          </Button>
+        </div>
       </div>
 
       {isLoading ? (
@@ -116,6 +143,11 @@ export default function PharmaciesPage() {
                 <div className="flex justify-between items-start">
                   <div>
                     <h3 className="font-bold text-lg text-textMain">{pharmacy.name}</h3>
+                    <div className="bg-primary-50 dark:bg-primary-900/20 px-2 py-0.5 rounded-lg border border-primary-100 dark:border-primary-800 mb-2 inline-block">
+                      <p className="text-xs font-black text-primary-700 dark:text-primary-300">
+                        👨‍⚕️ {pharmacy.users?.find(u => u.role === 'doctor')?.name || (language === 'ar' ? 'غير مسجل' : 'Unknown')}
+                      </p>
+                    </div>
                     <p className="text-sm text-textMuted">{pharmacy.address || 'No address'}</p>
                     <p className="text-xs text-textMuted mt-1">{pharmacy.phone || 'No phone'}</p>
                   </div>
@@ -205,6 +237,43 @@ export default function PharmaciesPage() {
 
       {isModalOpen && (
         <PharmacyModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} pharmacy={editingPharmacy} onSuccess={fetchPharmacies} />
+      )}
+
+      {isBroadcastOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-surface rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-border sm:scale-in-center">
+            <div className="p-5 border-b border-border bg-primary-50 dark:bg-primary-900/20 flex justify-between items-center">
+              <h3 className="font-bold text-primary-700 dark:text-primary-300 flex items-center gap-2">
+                <PlayFill className="h-5 w-5 rotate-180" />
+                {language === 'ar' ? 'إرسال تنبيه لجميع المستخدمين' : 'Global Broadcast'}
+              </h3>
+              <button onClick={() => setIsBroadcastOpen(false)}><X className="w-6 h-6" /></button>
+            </div>
+            <div className="p-5 space-y-4">
+              <div className="space-y-1.5">
+                <label className="text-sm font-bold">{language === 'ar' ? 'عنوان الرسالة' : 'Title'}</label>
+                <input 
+                  className="w-full bg-slate-50 dark:bg-slate-900 border border-border rounded-xl px-4 py-2"
+                  placeholder={language === 'ar' ? 'تحديث جديد...' : 'New update...'}
+                  value={broadcastData.title}
+                  onChange={e => setBroadcastData({...broadcastData, title: e.target.value})}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-sm font-bold">{language === 'ar' ? 'نص الرسالة' : 'Message Body'}</label>
+                <textarea 
+                  className="w-full bg-slate-50 dark:bg-slate-900 border border-border rounded-xl px-4 py-2 h-32"
+                  placeholder={language === 'ar' ? 'اكتب تفاصيل الرسالة هنا...' : 'Type message here...'}
+                  value={broadcastData.body}
+                  onChange={e => setBroadcastData({...broadcastData, body: e.target.value})}
+                />
+              </div>
+              <Button className="w-full h-12 text-lg font-bold" onClick={handleBroadcast} isLoading={isSending}>
+                {language === 'ar' ? 'إرسال للجميع الآن' : 'Send to All Users'}
+              </Button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
