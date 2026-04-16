@@ -25,19 +25,20 @@ export function PharmacyModal({
   const isEdit = !!pharmacy;
 
   const [activeTab, setActiveTab] = useState<'info' | 'branches'>('info');
-  const [formData, setFormData] = useState({
-    name: pharmacy?.name || '',
-    address: pharmacy?.address || '',
-    phone: pharmacy?.phone || '',
-    subscription_ends_at: pharmacy?.subscription_ends_at ? pharmacy.subscription_ends_at.split('T')[0] : '',
-    subscription_type: pharmacy?.subscription_type || 'monthly',
-    doctor_name: '',
-    doctor_email: '',
-    doctor_password: '',
-    ai_enabled: pharmacy?.ai_enabled ?? true,
-    daily_ai_limit: pharmacy?.daily_ai_limit ?? 50,
-    daily_sales_limit: pharmacy?.daily_sales_limit ?? '',
-  });
+    const [formData, setFormData] = useState({
+      name: pharmacy?.name || '',
+      address: pharmacy?.address || '',
+      phone: pharmacy?.phone || '',
+      subscription_ends_at: pharmacy?.subscription_ends_at ? pharmacy.subscription_ends_at.split('T')[0] : '',
+      subscription_type: pharmacy?.subscription_type || 'monthly',
+      doctor_name: '',
+      doctor_email: '',
+      doctor_password: '',
+      doctor_phone: '',
+      ai_enabled: pharmacy?.ai_enabled ?? true,
+      daily_ai_limit: pharmacy?.daily_ai_limit ?? 50,
+      daily_sales_limit: pharmacy?.daily_sales_limit ?? '',
+    });
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -69,6 +70,7 @@ export function PharmacyModal({
           ...formData,
           daily_ai_limit: formData.daily_ai_limit || 0,
           daily_sales_limit: formData.daily_sales_limit || null,
+          doctor_phone: formData.doctor_phone,
         };
         const res = await axiosInstance.post('/pharmacies', payload);
         toast.success(language === 'ar' ? `تم إنشاء الصيدلية! دكتور: ${res.data.doctor?.email}` : `Pharmacy created! Doctor: ${res.data.doctor?.email}`);
@@ -221,6 +223,10 @@ export function PharmacyModal({
                   <div>
                     <label className="text-sm font-medium text-textMain mb-1.5 block">{t.doctorEmail} *</label>
                     <Input type="email" required value={formData.doctor_email} onChange={e => setFormData({ ...formData, doctor_email: e.target.value })} />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-textMain mb-1.5 block">{language === 'ar' ? 'رقم هاتف الدكتور (للواتساب)' : 'Doctor Phone (WhatsApp)'}</label>
+                    <Input type="tel" value={formData.doctor_phone} onChange={e => setFormData({ ...formData, doctor_phone: e.target.value })} />
                   </div>
                   <div>
                     <label className="text-sm font-medium text-textMain mb-1.5 block">{t.doctorPassword} *</label>

@@ -34,9 +34,10 @@ export function Sidebar() {
 
   if (user?.role === 'admin') {
     navItems.push(
-      { href: '/',           label: t.dashboard,  icon: Speedometer2 },
-      { href: '/pharmacies', label: t.pharmacies, icon: Shop },
-      { href: '/users',      label: t.users,      icon: PeopleFill },
+      { href: '/',               label: t.dashboard,    icon: Speedometer2 },
+      { href: '/pharmacies',     label: t.pharmacies,   icon: Shop },
+      { href: '/users',          label: t.users,        icon: PeopleFill },
+      { href: '/admin-support',  label: language === 'ar' ? 'رسائل الدعم' : 'Support Inbox', icon: Robot } // Use an appropriate icon
     );
   } else {
     navItems.push(
@@ -58,6 +59,8 @@ export function Sidebar() {
     if (!user?.pharmacy || user.pharmacy.ai_enabled) {
       navItems.push({ href: '/ai-chat', label: t.aiAssistant, icon: Robot });
     }
+
+    navItems.push({ href: '/support', label: language === 'ar' ? 'الدعم الفني' : 'Support', icon: Robot });
   }
 
   navItems.push(
