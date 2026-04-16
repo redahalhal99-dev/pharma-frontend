@@ -425,7 +425,7 @@ export default function POSPage() {
   };
 
   const handleCheckoutConfirm = async () => {
-    if (cart.length === 0) return;
+    if (cart.length === 0 || isCheckoutLoading) return;
 
     if (checkoutMethod === 'debt' && !debtorId) {
       toast.error(isAr ? 'الرجاء اختيار العميل (شكك) أو إضافته أولاً' : 'Please select a customer for debt payment');

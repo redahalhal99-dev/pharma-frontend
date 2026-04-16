@@ -51,6 +51,7 @@ export function PharmacyModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isLoading) return;
     setIsLoading(true);
     try {
       if (isEdit) {
@@ -86,6 +87,7 @@ export function PharmacyModal({
 
   const handleAddBranch = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isBranchSaving) return;
     if (!branchForm.name.trim()) return;
     setIsBranchSaving(true);
     try {
