@@ -418,7 +418,7 @@ export default function POSPage() {
 
   const handleCheckoutInit = () => {
     if (cart.length === 0) { toast.error(isAr ? 'السلة فارغة' : 'Cart is empty'); return; }
-    setReceivedAmount('');
+    setReceivedAmount(finalTotal.toFixed(2));
     setCustomerName('');
     setShowCheckoutModal(true);
     setTimeout(() => receivedInputRef.current?.focus(), 100);
@@ -435,8 +435,6 @@ export default function POSPage() {
     setIsCheckoutLoading(true);
     try {
       const payload = {
-        payment_method: checkoutMethod,
-        received_amount: Number(receivedAmount) || cartTotal,
         shift: currentShift,
         debtor_id: checkoutMethod === 'debt' ? debtorId : null,
         customer_name: customerName.trim() || null,
@@ -893,7 +891,7 @@ export default function POSPage() {
               <div className="space-y-2">
                 <label className="flex items-center gap-2 font-bold text-textMain text-sm">
                   <DashLg className="h-4 w-4 text-emerald-500" />
-                  {isAr ? 'نسبة الخصم المئوية % (اختياري)' : 'Discount % (optional)'}
+                  {isAr ? 'خصم مئوي % (مثلاً 10 لخصم 10%)' : 'Discount Percentage % (e.g. 10 for 10%)'}
                 </label>
                 <div className="relative">
                   <input
