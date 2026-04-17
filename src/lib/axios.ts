@@ -54,9 +54,21 @@ axiosInstance.interceptors.response.use(
         sessionStorage.removeItem('token');
         sessionStorage.removeItem('auth-storage');
         
-        // Redirect to login
-        window.location.href = '/login';
+        // Redirect to login using a safe method
+        if (typeof window !== 'undefined') {
+          window.location.replace('/login');
+        }
       }
+    }
+    
+    // Handle 403 Forbidden (e.g. frozen account)
+    if (error.response?.status === 403) {
+      console.error('Access forbidden: possible account freeze or permission issue');
+    }
+
+    // Handle 500/503 errors gracefully
+    if (error.response?.status >= 500) {
+      console.error('Server error occurred. Please try again later.');
     }
     return Promise.reject(error);
   }
