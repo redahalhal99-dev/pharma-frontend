@@ -53,7 +53,14 @@ export default function LoginPage() {
     setIsLoading(true);
     setError('');
     try {
-      const response = await axiosInstance.post('/login', { email, password });
+      const sanitizedEmail = email.trim();
+      const sanitizedPassword = password.trim();
+      
+      const response = await axiosInstance.post('/login', { 
+        email: sanitizedEmail, 
+        password: sanitizedPassword 
+      });
+      
       if (response.data.token && response.data.user) {
         setAuth(response.data.user, response.data.token, isRememberMe);
         toast.success(language === 'ar' ? 'تم تسجيل الدخول بنجاح ✅' : 'Login successful ✅');
