@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import {
   Shop, CheckLg, StarFill, Telephone, Envelope, Clock, ShieldLock,
-  ChevronRight, Robot, BoxSeam, BarChartLine, ArrowRepeat, X
+  ChevronRight, Robot, BoxSeam, BarChartLine, ArrowRepeat, X, Eye, EyeSlash
 } from 'react-bootstrap-icons';
 import toast from 'react-hot-toast';
 
@@ -32,6 +32,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isRememberMe, setIsRememberMe] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [plans, setPlans] = useState<Plan[]>([]);
@@ -244,11 +245,21 @@ export default function LoginPage() {
                 <label className="text-sm font-medium text-slate-300">
                   {language === 'ar' ? 'كلمة المرور' : 'Password'}
                 </label>
-                <input
-                  type="password" id="password" name="password" autoComplete="current-password" required value={password} onChange={e => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                />
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    id="password" name="password" autoComplete="current-password" required value={password} onChange={e => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-2.5 pl-12 pr-4 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 left-3 flex items-center text-slate-400 hover:text-white transition-colors"
+                  >
+                    {showPassword ? <EyeSlash className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
               </div>
               <label className="flex items-center gap-2 cursor-pointer">
                 <input type="checkbox" checked={isRememberMe} onChange={e => setIsRememberMe(e.target.checked)} className="rounded" />
