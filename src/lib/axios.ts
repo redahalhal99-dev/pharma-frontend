@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // The Laravel backend runs on port 8000 usually. We'll set this in .env.local, fallback to localhost:8000
-const baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+const baseURL = process.env.NEXT_PUBLIC_API_URL || 'https://pharma-backend-production-0120.up.railway.app/api';
 
 const axiosInstance = axios.create({
   baseURL,
