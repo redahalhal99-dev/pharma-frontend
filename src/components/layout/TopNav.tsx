@@ -12,7 +12,7 @@ import { useEffect, useState } from 'react';
 import { useAppStore } from '@/store/useAppStore';
 import { usePathname } from 'next/navigation';
 import { translations } from '@/locales/translations';
-import { Sun, Moon, FileEarmarkText } from 'react-bootstrap-icons';
+import { Sun, Moon, FileEarmarkText, Shop } from 'react-bootstrap-icons';
 import { ShiftClosureModal } from './ShiftClosureModal';
 
 // Map pathnames to page titles
@@ -52,6 +52,21 @@ export function TopNav() {
   const { isOffline, isSyncing, pendingSales, setOfflineStatus, syncPendingSales } = useOfflineStore();
   const pageTitle = usePageTitle(language);
   const [isShiftModalOpen, setIsShiftModalOpen] = useState(false);
+  const [isBranchMenuOpen, setIsBranchMenuOpen] = useState(false);
+
+  const handleBranchSwitch = async (branchId: number | null) => {
+    try {
+      const res = await axiosInstance.post('/switch-branch', { branch_id: branchId });
+      // Update store
+      useAuthStore.getState().setActiveBranch(branchId);
+      setIsBranchMenuOpen(false);
+      toast.success(res.data.message || (language === 'ar' ? 'تم تغيير الفرع' : 'Branch switched'));
+      // Reload page to fetch new branch data
+      window.location.reload();
+    } catch {
+      toast.error(language === 'ar' ? 'فشل تبديل الفرع' : 'Failed to switch branch');
+    }
+  };
 
   // Monitor online status + auto-sync on reconnect
   useEffect(() => {
@@ -141,6 +156,49 @@ export function TopNav() {
               {currentShift === 'morning' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </button>
             <ShiftClosureModal isOpen={isShiftModalOpen} onClose={() => setIsShiftModalOpen(false)} />
+          </div>
+        )}
+
+        {/* Branch Selector */}
+        {user?.role === 'doctor' && user.pharmacy?.branches && user.pharmacy.branches.length > 0 && (
+          <div className="relative mr-2 md:mr-3 border-l border-border pl-2 md:pl-3 ml-1 rtl:border-l-0 rtl:border-r rtl:pr-2 rtl:md:pr-3 rtl:mr-0">
+            <button
+              onClick={() => setIsBranchMenuOpen(!isBranchMenuOpen)}
+              className="flex items-center gap-2 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-xl transition-colors border border-slate-200 dark:border-slate-700"
+            >
+              <Shop className="h-4 w-4 text-primary-500" />
+              <span className="text-xs font-bold text-textMain max-w-[100px] truncate hidden sm:inline">
+                {user.active_branch_id
+                  ? user.pharmacy.branches.find(b => b.id === user.active_branch_id)?.name
+                  : (language === 'ar' ? 'كل الفروع' : 'All Branches')}
+              </span>
+            </button>
+
+            {isBranchMenuOpen && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setIsBranchMenuOpen(false)} />
+                <div className="absolute top-12 ltr:right-0 rtl:left-0 z-50 w-48 bg-surface rounded-xl shadow-premium border border-border py-2 animate-in fade-in zoom-in-95">
+                  <div className="px-3 py-1.5 text-[10px] font-black text-textMuted uppercase tracking-wider">
+                    {language === 'ar' ? 'اختر الفرع' : 'Select Branch'}
+                  </div>
+                  <button
+                    onClick={() => handleBranchSwitch(null)}
+                    className={`w-full text-start px-4 py-2.5 text-sm font-semibold transition-colors ${!user.active_branch_id ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/30' : 'hover:bg-slate-50 dark:hover:bg-slate-800 text-textMain'}`}
+                  >
+                    {language === 'ar' ? 'كل الفروع (إجمالي)' : 'All Branches (Total)'}
+                  </button>
+                  {user.pharmacy.branches.map(branch => (
+                    <button
+                      key={branch.id}
+                      onClick={() => handleBranchSwitch(branch.id)}
+                      className={`w-full text-start px-4 py-2.5 text-sm font-semibold transition-colors ${user.active_branch_id === branch.id ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/30' : 'hover:bg-slate-50 dark:hover:bg-slate-800 text-textMain'}`}
+                    >
+                      {branch.name}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
           </div>
         )}
 

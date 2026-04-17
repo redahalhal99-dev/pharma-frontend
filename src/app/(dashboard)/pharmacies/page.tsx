@@ -11,6 +11,7 @@ import { translations } from '@/locales/translations';
 import { PlusLg, PencilSquare, Trash, ArrowRepeat, Snow, PlayFill, ExclamationTriangle, Robot, X } from 'react-bootstrap-icons';
 import toast from 'react-hot-toast';
 import { PharmacyModal } from './components/PharmacyModal';
+import { BranchStatsModal } from './components/BranchStatsModal';
 
 type Pharmacy = {
   id: number;
@@ -44,6 +45,7 @@ export default function PharmaciesPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isBroadcastOpen, setIsBroadcastOpen] = useState(false);
+  const [statsModalData, setStatsModalData] = useState<{ id: number; name: string } | null>(null);
   const [editingPharmacy, setEditingPharmacy] = useState<any>(null);
   const [broadcastData, setBroadcastData] = useState({ title: '', body: '' });
   const [isSending, setIsSending] = useState(false);
@@ -209,7 +211,12 @@ export default function PharmaciesPage() {
                 </div>
 
                 {/* Actions */}
-                <div className="flex gap-2 pt-2 border-t border-border">
+                <div className="flex gap-2 pt-2 border-t border-border mt-3">
+                  <Button variant="outline" size="sm" className="w-full text-indigo-600 border-indigo-300" onClick={() => setStatsModalData({ id: pharmacy.id, name: pharmacy.name })}>
+                    <GraphUpArrow className="h-3 w-3 mr-1" /> {language === 'ar' ? 'أرباح الفروع' : 'Branch P&L'}
+                  </Button>
+                </div>
+                <div className="flex gap-2 pt-2 mt-1">
                   {pharmacy.is_frozen ? (
                     <Button variant="outline" size="sm" className="text-green-600 border-green-300" onClick={() => handleUnfreeze(pharmacy.id)}>
                       <PlayFill className="h-3 w-3 mr-1" /> {language === 'ar' ? 'تشغيل' : 'Unfreeze'}
@@ -238,6 +245,13 @@ export default function PharmaciesPage() {
       {isModalOpen && (
         <PharmacyModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} pharmacy={editingPharmacy} onSuccess={fetchPharmacies} />
       )}
+
+      <BranchStatsModal 
+        isOpen={statsModalData !== null} 
+        onClose={() => setStatsModalData(null)} 
+        pharmacyId={statsModalData?.id || 0} 
+        pharmacyName={statsModalData?.name || ''} 
+      />
 
       {isBroadcastOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">

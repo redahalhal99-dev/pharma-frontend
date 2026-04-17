@@ -7,12 +7,14 @@ type User = {
   email: string;
   role: 'admin' | 'doctor' | 'cashier';
   pharmacy_id?: number | null;
+  active_branch_id?: number | null;
   pharmacy?: {
     id: number;
     name: string;
     ai_enabled: boolean;
     daily_ai_limit: number;
     daily_sales_limit: number | null;
+    branches?: { id: number; name: string }[];
   };
 };
 
@@ -22,6 +24,7 @@ interface AuthState {
   rememberMe: boolean;
   isSubscriptionExpired: boolean;
   setAuth: (user: User, token: string, remember?: boolean) => void;
+  setActiveBranch: (branchId: number | null) => void;
   logout: () => void;
   setSubscriptionStatus: (expired: boolean) => void;
 }
@@ -42,6 +45,11 @@ export const useAuthStore = create<AuthState>()(
           sessionStorage.setItem('token', token);
           localStorage.removeItem('token'); // Clear any old persistent token
         }
+      },
+      setActiveBranch: (branchId) => {
+        set((state) => ({
+          user: state.user ? { ...state.user, active_branch_id: branchId } : null
+        }));
       },
       logout: () => {
         set({ user: null, token: null });
